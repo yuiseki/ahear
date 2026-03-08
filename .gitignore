@@ -1,0 +1,4 @@
+__pycache__/
+.pytest_cache/
+python/src/ahear/__pycache__/
+python/tests/__pycache__/
