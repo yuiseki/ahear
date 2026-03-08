@@ -28,6 +28,7 @@ Python:
 
 - `python/src/ahear/whisper_listener.py`
 - `python/src/ahear/moonshine_listener.py`
+- `python/src/ahear/speaker_auth.py`
 
 The legacy files in `tmp/whispercpp-listen/` are now thin compatibility
 wrappers that delegate to these modules.
@@ -164,6 +165,8 @@ job definition, but it currently still orchestrates the compatibility wrappers.
 
 - `ahear` already owns the extracted STT backend implementation, even though the
   operator-facing entrypoint is still the legacy wrapper in `tmp/whispercpp-listen`
+- `ahear` now also owns the speaker verification primitive, while lock/unlock
+  policy still stays outside the repo
 - **「1プロセス = 1デバイス」** により、インスタンスを増やすだけで監視対象マイクを拡張できる
 - `source` フィールドにより複数インスタンスの出力を `acore` 側で識別可能
 - Voice command parsing is fully removed from `ahear` (moved to `acore`)

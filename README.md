@@ -12,6 +12,9 @@ Current status:
 - `python/src/ahear/moonshine_listener.py`
   - extracted from `tmp/whispercpp-listen/listen_only_moonshine_server.py`
   - keeps the current `ffmpeg + moonshine` compatibility contract
+- `python/src/ahear/speaker_auth.py`
+  - extracted from `tmp/whispercpp-listen/voice_command_loop.py`
+  - keeps the current speaker verification primitive while biometric policy stays outside `ahear`
 
 `tmp/whispercpp-listen/listen_only_whisper_server.py` and
 `tmp/whispercpp-listen/listen_only_moonshine_server.py` now exist as thin
