@@ -11,7 +11,12 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from ahear.speaker_auth import speaker_auth_enabled, verify_speaker_identity
+from ahear.speaker_auth import (
+    SpeakerAuthRuntime,
+    initialize_speaker_auth_runtime,
+    speaker_auth_enabled,
+    verify_speaker_identity,
+)
 
 
 def _build_auth_context(*, similarity: float, threshold: float = 0.5):
@@ -161,3 +166,82 @@ def test_verify_speaker_identity_returns_error_on_exception() -> None:
     assert ok is False
     assert err == "声紋認証に失敗しました"
     assert logs == ["Speaker ID verification error: torchaudio error"]
+
+
+def test_initialize_speaker_auth_runtime_returns_empty_state_when_disabled() -> None:
+    runtime = initialize_speaker_auth_runtime(
+        enabled=False,
+        requested_device="cpu",
+        speaker_master="/tmp/master.npy",
+        logger=lambda _msg: None,
+    )
+
+    assert runtime == SpeakerAuthRuntime(device="cpu")
+
+
+def test_initialize_speaker_auth_runtime_loads_classifier_and_voiceprint() -> None:
+    logs: list[str] = []
+    classifier = object()
+    voiceprint = np.array([1.0, 0.0, 0.0])
+    torch_module = mock.Mock()
+    torch_module.cuda.is_available.return_value = True
+    np_module = mock.Mock()
+    np_module.load.return_value = voiceprint
+    torchaudio_module = mock.Mock()
+
+    runtime = initialize_speaker_auth_runtime(
+        enabled=True,
+        requested_device="cpu",
+        speaker_master="/tmp/master.npy",
+        logger=logs.append,
+        torchaudio_module=torchaudio_module,
+        torch_module=torch_module,
+        np_module=np_module,
+        classifier_factory=mock.Mock(return_value=classifier),
+        path_exists=lambda path: path == "/tmp/master.npy",
+        load_voiceprint=np_module.load,
+    )
+
+    assert runtime.classifier is classifier
+    assert runtime.voiceprint is voiceprint
+    assert runtime.torchaudio_module is torchaudio_module
+    assert runtime.torch_module is torch_module
+    assert runtime.np_module is np_module
+    assert runtime.device == "cuda:0"
+    assert any("CUDA detected, upgrading device to cuda:0" in line for line in logs)
+    assert any("master voiceprint loaded from /tmp/master.npy" in line for line in logs)
+
+
+def test_initialize_speaker_auth_runtime_logs_missing_master_voiceprint() -> None:
+    logs: list[str] = []
+
+    runtime = initialize_speaker_auth_runtime(
+        enabled=True,
+        requested_device="cpu",
+        speaker_master="/tmp/missing.npy",
+        logger=logs.append,
+        torchaudio_module=mock.Mock(),
+        torch_module=mock.Mock(cuda=mock.Mock(is_available=mock.Mock(return_value=False))),
+        np_module=mock.Mock(),
+        classifier_factory=mock.Mock(return_value=object()),
+        path_exists=lambda _path: False,
+        load_voiceprint=mock.Mock(),
+    )
+
+    assert runtime.voiceprint is None
+    assert any("master voiceprint not found" in line for line in logs)
+
+
+def test_initialize_speaker_auth_runtime_logs_import_error() -> None:
+    logs: list[str] = []
+
+    runtime = initialize_speaker_auth_runtime(
+        enabled=True,
+        requested_device="cpu",
+        speaker_master="/tmp/master.npy",
+        logger=logs.append,
+        import_modules=lambda: (_ for _ in ()).throw(ImportError("missing dep")),
+    )
+
+    assert runtime.classifier is None
+    assert any("required package not installed" in line for line in logs)

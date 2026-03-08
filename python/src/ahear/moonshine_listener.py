@@ -155,7 +155,7 @@ def init_silero_vad() -> Any | None:
             return _silero_vad_model
         try:
             import torch  # noqa: F401
-            from silero_vad import load_silero_vad
+            from silero_vad import load_silero_vad  # type: ignore[import-untyped]
             _silero_vad_model = load_silero_vad()
             return _silero_vad_model
         except Exception as exc:
@@ -179,8 +179,8 @@ def init_transcriber(model_size: str = "base") -> None:
         if _transcriber is not None:
             return
         try:
-            from moonshine_voice import Transcriber, get_model_for_language
-            from moonshine_voice.moonshine_api import ModelArch
+            from moonshine_voice import Transcriber, get_model_for_language  # type: ignore[import-untyped]
+            from moonshine_voice.moonshine_api import ModelArch  # type: ignore[import-untyped]
         except ImportError as exc:
             raise RuntimeError(
                 "moonshine_voice not installed. Run: pip install moonshine-voice"

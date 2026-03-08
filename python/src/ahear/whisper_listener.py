@@ -318,7 +318,7 @@ class ListenLoop:
         proc = self._spawn_parec()
         assert proc.stdout is not None
 
-        pre_roll = collections.deque(maxlen=self.pre_roll_chunks)
+        pre_roll: collections.deque[bytes] = collections.deque(maxlen=self.pre_roll_chunks)
         in_speech = False
         speech_buf = bytearray()
         speech_chunks = 0
