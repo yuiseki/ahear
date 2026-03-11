@@ -167,6 +167,9 @@ job definition, but it currently still orchestrates the compatibility wrappers.
   operator-facing entrypoint is still the legacy wrapper in `tmp/whispercpp-listen`
 - `ahear` now also owns the speaker verification primitive, while lock/unlock
   policy still stays outside the repo
+- the default speaker master asset now lives under
+  `python/src/ahear/models/master_voiceprint.npy` as a gitignored local cache,
+  so production runtime no longer needs `tmp/whispercpp-listen/tests/fixtures`
 - **「1プロセス = 1デバイス」** により、インスタンスを増やすだけで監視対象マイクを拡張できる
 - `source` フィールドにより複数インスタンスの出力を `acore` 側で識別可能
 - Voice command parsing is fully removed from `ahear` (moved to `acore`)
