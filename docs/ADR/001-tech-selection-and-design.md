@@ -29,6 +29,7 @@ Python:
 - `python/src/ahear/whisper_listener.py`
 - `python/src/ahear/moonshine_listener.py`
 - `python/src/ahear/speaker_auth.py`
+- `python/src/ahear/collect_guest_voice.py`
 
 The legacy files in `tmp/whispercpp-listen/` are now thin compatibility
 wrappers that delegate to these modules.
@@ -186,3 +187,14 @@ job definition, but it currently still orchestrates the compatibility wrappers.
 3. Introduce a stable `ahear` operator-facing CLI separate from PoC wrappers
 4. Decide whether the long-term production runtime should stay Python or be
    rewritten in Rust
+
+### Guest Voice Collection
+
+Guest / non-owner voice capture is accepted as part of the short-term Python
+compatibility surface because it is operationally valuable and independent from
+command parsing. The canonical persistent default is now:
+
+- `/home/yuiseki/Workspaces/private/datasets/voices/others`
+
+This keeps the public repo free from private voice assets while removing the
+old `/tmp`-only default from the legacy script.
